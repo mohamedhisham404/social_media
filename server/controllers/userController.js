@@ -23,6 +23,10 @@ const signupUser = async(req,res) =>{
         const {name, email,username,password} = req.body;
         const user = await User.findOne({$or:[{ email},{username}]});
 
+        if(! name || ! email || ! username || ! password){
+            return res.status(400).json({ status: httpStatus.ERROR, data: 'All fields are required' });
+        }
+
         if(user){
             return res.status(400).json({ status: httpStatus.ERROR, data: 'User already exists' });
         }
@@ -48,6 +52,10 @@ const signupUser = async(req,res) =>{
 const loginUser = async(req,res) =>{
     try {
         const {username, password} = req.body;
+
+        if(!username || !password){
+            return res.status(400).json({ status: httpStatus.ERROR, data: 'Username and Password are required' });
+        }
 
         const user = await User.findOne({ username });
         if (!user) {
