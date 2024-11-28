@@ -31,8 +31,10 @@ import { useToast } from "@chakra-ui/react";
       username: '',
       password: ''
     })
+    const [loading, setLoading] = useState(true)
 
     const handleLogin = async () =>{
+      setLoading(true);
       try {
         const res = await fetch("/api/users/login",{
           method: 'POST',
@@ -64,6 +66,8 @@ import { useToast } from "@chakra-ui/react";
           duration: 3000,
           isClosable: true,
         });
+      }finally{
+        setLoading(false);
       }
     }
   
@@ -120,6 +124,7 @@ import { useToast } from "@chakra-ui/react";
                     bg: useColorModeValue("gray.700","gray.800"),
                   }}
                   onClick={handleLogin}
+                  isLoading={loading}
                   >
                   Log In
                 </Button>

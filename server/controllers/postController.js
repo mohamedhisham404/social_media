@@ -1,29 +1,36 @@
 import { httpStatus } from '../utils/httpStatus.js';
 import Post from '../models/postModel.js';
 import User from '../models/userModel.js';
+import {v2 as cloudinary} from 'cloudinary';
 
 const createPost =async (req, res)=>{
-    const { postedBy, text,img } = req.body;
+    const { postedBy, text } = req.body;
+    let img = req.body.img;
 
     if(!postedBy ||!text){
-        return res.status(400).json({ status: httpStatus.ERROR, message: 'posted by and text field are required' });
+        return res.status(400).json({ status: httpStatus.ERROR, data: 'posted by and text field are required' });
     }
 
     try {
         const user = await User.findById(postedBy);
 
         if(!user){
-            return res.status(404).json({ status: httpStatus.ERROR, message: 'User not found' });
+            return res.status(404).json({ status: httpStatus.ERROR, data: 'User not found' });
         }
 
         if(user._id.toString() !== req.user._id.toString()){
-            return res.status(401).json({ status: httpStatus.ERROR, message: 'Unauthorized to create post' });
+            return res.status(401).json({ status: httpStatus.ERROR, data: 'Unauthorized to create post' });
         }
 
         const maxLength = 500;
 
         if(text.length > maxLength){
-            return res.status(400).json({ status: httpStatus.ERROR, message: `Text can't be more than ${maxLength} characters` });
+            return res.status(400).json({ status: httpStatus.ERROR, data: `Text can't be more than ${maxLength} characters` });
+        }
+
+        if(img){
+			const uploadedResponse = await cloudinary.uploader.upload(img);
+            img = uploadedResponse.secure_url;
         }
 
         const newPost = new Post({
@@ -35,7 +42,7 @@ const createPost =async (req, res)=>{
 
         res.status(201).json({ status: httpStatus.SUCCESS, data: newPost });
     } catch (error) {
-        res.status(500).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
 };
 
@@ -44,12 +51,12 @@ const getPost =async (req, res)=>{
         const post = await Post.findById(req.params.id);
 
         if(!post){
-            return res.status(404).json({ status: httpStatus.ERROR, message: 'Post not found' });
+            return res.status(404).json({ status: httpStatus.ERROR, data: 'Post not found' });
         }
 
         res.json({ status: httpStatus.SUCCESS, data: post});
     } catch (error) {
-        res.status(500).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
 };
 
@@ -58,18 +65,18 @@ const deletePost =async (req, res)=>{
         const post = await Post.findById(req.params.id);
 
         if(!post){
-            return res.status(404).json({ status: httpStatus.ERROR, message: 'Post not found' });
+            return res.status(404).json({ status: httpStatus.ERROR, data: 'Post not found' });
         }
 
         if(post.postedBy.toString()!== req.user._id.toString()){
-            return res.status(401).json({ status: httpStatus.ERROR, message: 'Unauthorized to delete post' });
+            return res.status(401).json({ status: httpStatus.ERROR, data: 'Unauthorized to delete post' });
         }
 
         await Post.findByIdAndDelete(req.params.id);
 
-        res.status(204).json({ status: httpStatus.SUCCESS, message: 'Post deleted successfully' });
+        res.status(204).json({ status: httpStatus.SUCCESS, data: 'Post deleted successfully' });
     } catch (error) {
-        res.status(500).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
 };
 
@@ -81,7 +88,7 @@ const likePost =async (req, res)=>{
         const post = await Post.findById(postId);
 
         if(!post){
-            return res.status(404).json({ status: httpStatus.ERROR, message: 'Post not found' });
+            return res.status(404).json({ status: httpStatus.ERROR, data: 'Post not found' });
         }
 
         const userLikePost = post.likes.includes(userId);
@@ -91,15 +98,15 @@ const likePost =async (req, res)=>{
         if(userLikePost){
             //unlike post
             await Post.updateOne({_id:postId},{$pull:{likes:userId}});
-            res.status(200).json({ status: httpStatus.SUCCESS, message: 'Post unliked successfully' });
+            res.status(200).json({ status: httpStatus.SUCCESS, data: 'Post unliked successfully' });
         }else{
             //like post
             post.likes.push(userId);
             await post.save();
-            res.status(200).json({ status: httpStatus.SUCCESS, message: 'Post liked successfully' });
+            res.status(200).json({ status: httpStatus.SUCCESS, data: 'Post liked successfully' });
         }
     } catch (error) {
-        res.status(500).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
 };
 
@@ -112,12 +119,12 @@ const replyToPost =async (req, res)=>{
 		const username = req.user.username;
 
         if(!text){
-            return res.status(400).json({ status: httpStatus.ERROR, message: 'Reply text is required' });
+            return res.status(400).json({ status: httpStatus.ERROR, data: 'Reply text is required' });
         }
 
         const post = await Post.findById(postId);
         if(!post){
-            return res.status(404).json({ status: httpStatus.ERROR, message: 'Post not found' });
+            return res.status(404).json({ status: httpStatus.ERROR, data: 'Post not found' });
         }
         const reply = { userId, text, userProfilePic, username };
         console.log(reply)
@@ -127,7 +134,7 @@ const replyToPost =async (req, res)=>{
 
         res.status(200).json({ status: httpStatus.SUCCESS, data: reply });
     } catch (error) {
-        res.status(500).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
 };
 
@@ -138,7 +145,7 @@ const getFeedPosts =async (req, res)=>{
 
 
         if(!user){
-            return res.status(404).json({ status: httpStatus.ERROR, message: 'User not found' });
+            return res.status(404).json({ status: httpStatus.ERROR, data: 'User not found' });
         }
 
         const following = user.following;
@@ -146,7 +153,7 @@ const getFeedPosts =async (req, res)=>{
 		const feedPosts = await Post.find({ postedBy: { $in: following } });
         res.status(200).json({ status: httpStatus.SUCCESS, data: feedPosts });
     } catch (error) {
-        res.status(500).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
 };
 
