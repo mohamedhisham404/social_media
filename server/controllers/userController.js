@@ -111,7 +111,7 @@ const followUnfollowUser = async(req,res) =>{
 			// Follow user
 			await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } });
 			await User.findByIdAndUpdate(req.user._id, { $push: { following: id } });
-			res.status(200).json({ status: httpStatus.SUCCESS,message: "User followed successfully" });
+			res.status(200).json({ status: httpStatus.SUCCESS,data: "User followed successfully" });
 		}
     } catch (error) {
         return res.status(500).json({ status: httpStatus.FAIL, data: error.message });

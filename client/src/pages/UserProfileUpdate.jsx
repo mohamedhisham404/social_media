@@ -28,9 +28,12 @@ export default function UserProfileUpdate() {
   });
   const fileRef = useRef(null);
   const toast = useToast();
+  const[updating, setUpdating] = useState(false)
 
   const handleSubmit = async (e) =>{
     e.preventDefault();
+    if(updating)return;
+    setUpdating(true)
     try {
       const res = await fetch(`/api/users/update/${user._id}`, {
         method: "PUT",
@@ -40,7 +43,6 @@ export default function UserProfileUpdate() {
         body: JSON.stringify({...inputs,profilePic:imgUrl}),
       });
       const data = await res.json();
-      console.log(data)
 
       if (data.status === "error" || data.status === "faile") {
         toast({
@@ -71,6 +73,8 @@ export default function UserProfileUpdate() {
         duration: 3000,
         isClosable: true,
       });
+    }finally{
+      setUpdating(false)
     }
   }
 
@@ -188,6 +192,7 @@ export default function UserProfileUpdate() {
                 bg: "green.500",
               }}
               type="submit"
+              isLoading={updating}
             >
               Submit
             </Button>
