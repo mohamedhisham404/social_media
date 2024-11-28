@@ -2,6 +2,7 @@ import { Button } from "@chakra-ui/react"
 import { useSetRecoilState } from "recoil"
 import userAtom from "../atoms/userAtom"
 import useShowToast from "../hooks/useShowToast";
+import { MdLogout } from "react-icons/md";
 
 const LogoutButton = () => {
     const setUser = useSetRecoilState(userAtom);
@@ -17,7 +18,7 @@ const LogoutButton = () => {
               })
               const data = await res.json();
 
-              if(data.status=="error"){
+              if(data.status=="error" || data.status === "faile"){
                 showToast("",data.data,"error");
                 return;
               }
@@ -36,7 +37,9 @@ const LogoutButton = () => {
             right={"30px"}
             size={"sm"}
             onClick={handleLogout}
-        >Logout</Button>
+        >
+            <MdLogout />
+        </Button>
     )
 }
 

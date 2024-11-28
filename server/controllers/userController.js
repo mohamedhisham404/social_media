@@ -2,6 +2,7 @@ import { httpStatus } from '../utils/httpStatus.js';
 import User from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import generateJWTsetCookie from '../utils/generateJWTsetCookie.js';
+import {v2 as cloudinary} from 'cloudinary';
 
 const getUserProfile = async(req,res) =>{
     const {username} = req.params;
@@ -118,7 +119,8 @@ const followUnfollowUser = async(req,res) =>{
 };
 
 const updateUser = async(req,res) =>{
-    const { name, email, username, password,bio,profilePic } = req.body;
+    const { name, email, username, password,bio } = req.body;
+    let profilePic = req.body.profilePic;
     const userId = req.user._id;
 
     try {
@@ -129,7 +131,7 @@ const updateUser = async(req,res) =>{
 
 
 		if (req.params.id !== userId.toString())
-			return res.status(400).json({ error: "You cannot update other user's profile" });
+			return res.status(400).json({  status: httpStatus.ERROR,data: "You cannot update other user's profile" });
 
         if(password){
             const salt = await bcrypt.genSalt(10);
@@ -137,18 +139,38 @@ const updateUser = async(req,res) =>{
             user.password = hashedPassword;
         }
 
+        const existingUser = await User.findOne({ username: req.body.username });
+        if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+            return res.status(400).json({
+                status: httpStatus.FAIL,
+                data: `The username "${req.body.username}" is already taken. Please choose a different one.`,
+            });
+        }
+
+        if (profilePic) {
+            // console.log("ProfilePic type:", typeof profilePic, "Value:", profilePic);
+			if (user.profilePic) {
+				await cloudinary.uploader.destroy(user.profilePic.split("/").pop().split(".")[0]);
+			}
+
+			const uploadedResponse = await cloudinary.uploader.upload(profilePic);
+			profilePic = uploadedResponse.secure_url;
+		}
+
         user.name = name || user.name;
 		user.email = email || user.email;
 		user.username = username || user.username;
-		user.profilePic = profilePic || user.profilePic;
+        user.profilePic = profilePic || user.profilePic
 		user.bio = bio || user.bio;
 
 		user = await user.save();
 
+        user.password=null;
+
         res.json({ status: httpStatus.SUCCESS, data: user });
 
     } catch (error) {
-        return res.status(200).status(500).json({ status: httpStatus.FAIL, data: error.message });
+        return res.status(500).json({ status: httpStatus.FAIL, data: error.message });
     }
 };
 

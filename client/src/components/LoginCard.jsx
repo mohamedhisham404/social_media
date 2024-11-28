@@ -20,7 +20,6 @@ import authScreenAtom from '../atoms/authAtom'
 // import useShowToast from '../hooks/useShowToast'
 import userAtom from '../atoms/userAtom'
 import { useToast } from "@chakra-ui/react";
-
   
   export default function LoginCard() {
     const [showPassword, setShowPassword] = useState(false)
@@ -43,7 +42,7 @@ import { useToast } from "@chakra-ui/react";
           body: JSON.stringify(inputs)
         })
         const data = await res.json();
-        if(data.status=="error"){
+        if(data.status=="error" || data.status === "faile"){
           // showToast("",data.data,"error");
           toast({
             title: "Login Failed",
@@ -54,9 +53,8 @@ import { useToast } from "@chakra-ui/react";
           });
           return;
         }
-
-        localStorage.setItem("user-threads", JSON.stringify(data));
-        setUser(data);
+        localStorage.setItem("user-threads", JSON.stringify(data.data));
+        setUser(data.data);
 
       } catch (error) {
         toast({

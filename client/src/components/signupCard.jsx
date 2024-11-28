@@ -46,7 +46,7 @@ export default function SignupCard() {
       });
       const data = await res.json();
 
-      if (data.status == "error") {
+      if (data.status == "error" || data.status === "faile") {
         // showToast("",data.data,"error");
 
         toast({
@@ -59,8 +59,8 @@ export default function SignupCard() {
         return;
       }
 
-      localStorage.setItem("user-threads", JSON.stringify(data));
-      setUser(data);
+      localStorage.setItem("user-threads", JSON.stringify(data.data));
+      setUser(data.data);
     } catch (error) {
       toast({
         title: "Signup Failed",
