@@ -151,7 +151,7 @@ const getFeedPosts =async (req, res)=>{
         const following = user.following;
 
 		const feedPosts = await Post.find({ postedBy: { $in: following } });
-        res.status(200).json({ status: httpStatus.SUCCESS, data: feedPosts });
+        res.status(200).json(feedPosts);
     } catch (error) {
         res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
