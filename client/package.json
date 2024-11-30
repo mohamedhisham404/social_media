@@ -17,6 +17,7 @@
     "@chakra-ui/toast": "^7.0.2",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "date-fns": "^4.1.0",
     "framer-motion": "^6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

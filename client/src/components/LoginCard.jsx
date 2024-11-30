@@ -31,7 +31,7 @@ import { useToast } from "@chakra-ui/react";
       username: '',
       password: ''
     })
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
 
     const handleLogin = async () =>{
       setLoading(true);
@@ -116,7 +116,7 @@ import { useToast } from "@chakra-ui/react";
               </FormControl>
               <Stack spacing={10} pt={2}>
                 <Button
-                  loadingText="Submitting"
+                  loadingText="Loging In"
                   size="lg"
                   bg={useColorModeValue("gray.600","gray.700")}
                   color={'white'}
