@@ -1,75 +1,145 @@
-import {Avatar,Flex,Text,Image,Box,Divider,Button,} from "@chakra-ui/react";
-import { BsThreeDots } from "react-icons/bs";
-// import Actions from "../components/Actions";
-import { useState } from "react";
+import {
+    Avatar,
+    Flex,
+    Text,
+    Image,
+    Box,
+    Divider,
+    Button,
+    Spinner,
+} from "@chakra-ui/react";
+import Actions from "../components/Actions";
+import { useEffect, useState } from "react";
+import { useToast } from "@chakra-ui/react";
+import useGetUserProfile from "../hooks/useGetUserProfile.js";
+import { useParams } from "react-router";
+import PostMenu from "../components/PostMenu";
+import { formatDistanceToNow } from "date-fns";
+import { useRecoilValue } from "recoil";
+import userAtom from "../atoms/userAtom";
 import Comment from "../components/Comment";
 
 const PostPage = () => {
-  const [liked, setLiked] = useState(false);
+    const { user, loading } = useGetUserProfile();
+    const [post, setPost] = useState(null);
+    const toast = useToast();
+    const { pid } = useParams();
+    const currrentuser = useRecoilValue(userAtom);
 
-  return (
-    <>
-      <Flex>
-        <Flex w={"full"} alignItems={"center"} gap={33}>
-          <Avatar src="/1.jpg" size={"md"} name="Mohamed Hisham" />
-          <Flex>
-            <Text fontSize={"sm"} fontWeight={"bold"}>
-              mohamedhisham
-            </Text>
-            <Image src="/verified.png" w={4} h={4} ml={4} />
-          </Flex>
-        </Flex>
-        <Flex gap={4} alignItems={"center"}>
-          <Text fontSize={"sm"} color={"gray.light"}>
-            id
-          </Text>
-          <BsThreeDots />
-        </Flex>
-      </Flex>
+    useEffect(() => {
+        const getPost = async () => {
+            try {
+                const res = await fetch(`/api/posts/${pid}`);
+                const data = await res.json();
 
-      <Text my={3}>my post</Text>
+                if (data.status === "error" || data.status === "faile") {
+                    toast({
+                        title: "Update Failed",
+                        status: "error",
+                        description: data.data,
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+                setPost(data);
+            } catch (error) {
+                toast({
+                    description: error.message || "An error occurred",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        };
+        getPost();
+    }, [pid]);
 
-      <Box
-        borderRadius={6}
-        overflow={"hidden"}
-        border={"1px solid"}
-        borderColor={"gray.light"}
-      >
-        <Image src={"/2.jpg"} w={"full"} />
-      </Box>
+    if (!user && loading) {
+        return (
+            <Flex justifyContent={"center"}>
+                <Spinner size={"xl"} />
+            </Flex>
+        );
+    }
 
-      {/* <Flex gap={3} my={3}>
-        <Actions liked={liked} setliked={setLiked} />
-      </Flex> */}
+    if (!post) return null;
+    return (
+        <>
+            <Flex>
+                <Flex w={"full"} alignItems={"center"} gap={33}>
+                    <Avatar
+                        src={user.data.profilePic}
+                        size={"md"}
+                        name="Mohamed Hisham"
+                    />
+                    <Flex>
+                        <Text fontSize={"sm"} fontWeight={"bold"}>
+                            {user.data.username}
+                        </Text>
+                        <Image src="/verified.png" w={4} h={4} ml={4} />
+                    </Flex>
+                </Flex>
+                <Flex gap={4} alignItems={"center"}>
+                    <Text
+                        fontSize={"xs"}
+                        width={36}
+                        textAlign={"right"}
+                        color={"gray.light"}
+                    >
+                        {formatDistanceToNow(new Date(post.createdAt))} ago
+                    </Text>
 
-      <Flex gap={2} alignItems={"center"}>
-        <Text color={"gray.light"} fontSize={"sm"}>
-          3 Replies
-        </Text>
+                    {/* Menu */}
+                    <PostMenu
+                        post={post}
+                        user={user.data}
+                        currrentuser={currrentuser}
+                        toast={toast}
+                        navigation={`/${user.data.username}`}
+                    />
+                </Flex>
+            </Flex>
 
-        <Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"}></Box>
+            <Text my={3}>{post.text}</Text>
 
-        <Text color={"gray.light"} fontSize={"sm"}>
-          {200 + (liked ? 1 : 0)} Likes
-        </Text>
-      </Flex>
+            {post.img && (
+                <Box
+                    borderRadius={6}
+                    overflow={"hidden"}
+                    border={"1px solid"}
+                    borderColor={"gray.light"}
+                >
+                    <Image src={post.img} w={"full"} />
+                </Box>
+            )}
 
-      <Divider my={4} />
+            <Flex gap={3} my={3}>
+                <Actions post={post} />
+            </Flex>
 
-      <Flex justifyContent={"space-between"}>
-        <Flex gap={2} alignItems={"center"}>
-          <Text fontSize={"2xl"}>👋</Text>
-          <Text color={"gray.light"}>Get the app to like, reply and post.</Text>
-        </Flex>
-        <Button>Get</Button>
-      </Flex>
+            <Divider my={4} />
 
-      <Divider my={4} />
+            <Flex justifyContent={"space-between"}>
+                <Flex gap={2} alignItems={"center"}>
+                    <Text fontSize={"2xl"}>👋</Text>
+                    <Text color={"gray.light"}>
+                        Get the app to like, reply and post.
+                    </Text>
+                </Flex>
+                <Button>Get</Button>
+            </Flex>
 
-      <Comment userAvatar={"/2.jpg"} createdAt={"1d"} comment={"This is a commnt"} userName={"Mohamed Hisham"} likes={200}/>  
-        
-    </>
-  );
+            <Divider my={4} />
+
+            {post.replies.map(reply =>(
+                <Comment
+                    key={reply._id}
+                    reply={reply}
+                />
+            ))}
+        </>
+    );
 };
 
 export default PostPage;

@@ -54,7 +54,7 @@ const getPost =async (req, res)=>{
             return res.status(404).json({ status: httpStatus.ERROR, data: 'Post not found' });
         }
 
-        res.json({ status: httpStatus.SUCCESS, data: post});
+        res.json(post);
     } catch (error) {
         res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
