@@ -9,23 +9,25 @@ import {
     Spinner,
 } from "@chakra-ui/react";
 import Actions from "../components/Actions";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 import useGetUserProfile from "../hooks/useGetUserProfile.js";
 import { useParams } from "react-router";
 import PostMenu from "../components/PostMenu";
 import { formatDistanceToNow } from "date-fns";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import Comment from "../components/Comment";
+import postsAtom from "../atoms/PostsAtom";
 
 const PostPage = () => {
     const { user, loading } = useGetUserProfile();
-    const [post, setPost] = useState(null);
     const toast = useToast();
     const { pid } = useParams();
     const currrentuser = useRecoilValue(userAtom);
+    const [posts,setPosts] = useRecoilState(postsAtom)
 
+    const currentPost = posts[0];
     useEffect(() => {
         const getPost = async () => {
             try {
@@ -42,7 +44,7 @@ const PostPage = () => {
                     });
                     return;
                 }
-                setPost(data);
+                setPosts([data]);
             } catch (error) {
                 toast({
                     description: error.message || "An error occurred",
@@ -53,7 +55,7 @@ const PostPage = () => {
             }
         };
         getPost();
-    }, [pid]);
+    }, [pid,setPosts]);
 
     if (!user && loading) {
         return (
@@ -63,7 +65,7 @@ const PostPage = () => {
         );
     }
 
-    if (!post) return null;
+    if (!currentPost) return null;
     return (
         <>
             <Flex>
@@ -87,12 +89,12 @@ const PostPage = () => {
                         textAlign={"right"}
                         color={"gray.light"}
                     >
-                        {formatDistanceToNow(new Date(post.createdAt))} ago
+                        {formatDistanceToNow(new Date(currentPost.createdAt))} ago
                     </Text>
 
                     {/* Menu */}
                     <PostMenu
-                        post={post}
+                        post={currentPost}
                         user={user.data}
                         currrentuser={currrentuser}
                         toast={toast}
@@ -101,21 +103,21 @@ const PostPage = () => {
                 </Flex>
             </Flex>
 
-            <Text my={3}>{post.text}</Text>
+            <Text my={3}>{currentPost.text}</Text>
 
-            {post.img && (
+            {currentPost.img && (
                 <Box
                     borderRadius={6}
                     overflow={"hidden"}
                     border={"1px solid"}
                     borderColor={"gray.light"}
                 >
-                    <Image src={post.img} w={"full"} />
+                    <Image src={currentPost.img} w={"full"} />
                 </Box>
             )}
 
             <Flex gap={3} my={3}>
-                <Actions post={post} />
+                <Actions post={currentPost} />
             </Flex>
 
             <Divider my={4} />
@@ -132,11 +134,11 @@ const PostPage = () => {
 
             <Divider my={4} />
 
-            {post.replies.map(reply =>(
+            {currentPost.replies.map(reply =>(
                 <Comment
                     key={reply._id}
                     reply={reply}
-                    lastReply = {reply._id === post.replies[post.replies.length - 1]._id}
+                    lastReply = {reply._id === currentPost.replies[currentPost.replies.length - 1]._id}
                     currentUser={currrentuser}
                     toast={toast}
                 />

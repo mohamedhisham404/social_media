@@ -24,8 +24,9 @@ const Comment = ({ reply, lastReply, currentUser, toast }) => {
                                 textAlign={"right"}
                                 color={"gray.light"}
                             >
-                                {formatDistanceToNow(new Date(reply.createdAt))}{" "}
-                                ago
+                                {reply.createdAt
+                                ? `${formatDistanceToNow(new Date(reply.createdAt))} ago`
+                                : "Unknown time"}
                             </Text>
 
                             {/* Menu */}

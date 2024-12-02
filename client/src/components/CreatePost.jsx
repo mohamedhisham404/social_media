@@ -25,6 +25,7 @@ import { useToast } from "@chakra-ui/react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import postsAtom from "../atoms/PostsAtom";
+import { useParams } from "react-router";
 
 const MAX_CHAR = 500;
 
@@ -38,6 +39,7 @@ const CreatePost = () => {
     const user = useRecoilValue(userAtom);
     const [updating, setUpdating] = useState(false);
     const [posts, setPosts] = useRecoilState(postsAtom)
+    const username = useParams()
 
     const handleTxextChange = (e) => {
         const inputText = e.target.value;
@@ -86,8 +88,9 @@ const CreatePost = () => {
                 duration: 3000,
                 isClosable: true,
             });
-
-            setPosts([data,...posts]);
+            if(username === user.username){
+                setPosts([data,...posts]);
+            }
             onClose();
             setPostText("");
             setImageUrl("");
