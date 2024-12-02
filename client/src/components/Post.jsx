@@ -133,7 +133,7 @@ function Post({ post, postedBy }) {
                         </Text>
 
                         {/* Menu */}
-                        <PostMenu post={post} user={user} currrentuser={currrentuser} toast={toast} />
+                        <PostMenu post={post} user={user} currrentuser={currrentuser} toast={toast} isComment={false}/>
                     </Flex>
                 </Flex>
 

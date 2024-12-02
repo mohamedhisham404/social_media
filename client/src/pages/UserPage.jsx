@@ -4,12 +4,14 @@ import Post from '../components/Post';
 import { useParams } from 'react-router';
 import { Flex, Spinner, useToast } from "@chakra-ui/react";
 import useGetUserProfile from "../hooks/useGetUserProfile.js"
+import { useRecoilState } from 'recoil';
+import postAtom from '../atoms/PostsAtom'
 
 const UserPage =()=>{
     const {user,loading} = useGetUserProfile()
     const {username} = useParams();
     const toast = useToast();
-    const [posts, setPosts] = useState([])
+    const [posts, setPosts] = useRecoilState(postAtom)
     const [fetchingPosts, setFetchingPosts] = useState(true)
 
     useEffect(()=>{
@@ -33,8 +35,8 @@ const UserPage =()=>{
         }
 
         getPosts();
-    },[username]);
-
+    },[username,setPosts]);
+    
     if(!user && loading){
         return(
             <Flex justifyContent={"center"}>
@@ -55,7 +57,7 @@ const UserPage =()=>{
             )}
 
             {posts.map((post) =>(
-                <Post key={post._id} post={post} postedBy={post.postedBy}/>  
+                <Post key={post._id} post={post} postedBy={post.postedBy} />  
             ))}
         </>
     )

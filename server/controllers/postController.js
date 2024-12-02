@@ -40,7 +40,7 @@ const createPost =async (req, res)=>{
         });
         await newPost.save();
 
-        res.status(201).json({ status: httpStatus.SUCCESS, data: newPost });
+        res.status(201).json( newPost );
     } catch (error) {
         res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }

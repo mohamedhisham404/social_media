@@ -22,8 +22,9 @@ import { useRef, useState } from "react";
 import usePreviewimg from "../hooks/usePreviewimg";
 import { BsFillImageFill } from "react-icons/bs";
 import { useToast } from "@chakra-ui/react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
+import postsAtom from "../atoms/PostsAtom";
 
 const MAX_CHAR = 500;
 
@@ -36,6 +37,7 @@ const CreatePost = () => {
     const [remainingChar, setRemaminingChar] = useState(MAX_CHAR);
     const user = useRecoilValue(userAtom);
     const [updating, setUpdating] = useState(false);
+    const [posts, setPosts] = useRecoilState(postsAtom)
 
     const handleTxextChange = (e) => {
         const inputText = e.target.value;
@@ -67,7 +69,6 @@ const CreatePost = () => {
                 }),
             });
             const data = await respons.json();
-            console.log(data);
             if (data.status === "error" || data.status === "faile") {
                 toast({
                     title: "Failed to post",
@@ -86,6 +87,7 @@ const CreatePost = () => {
                 isClosable: true,
             });
 
+            setPosts([data,...posts]);
             onClose();
             setPostText("");
             setImageUrl("");
@@ -111,6 +113,10 @@ const CreatePost = () => {
                 leftIcon={<AddIcon />}
                 bg={useColorModeValue("gray.300", "gray.dark")}
                 onClick={onOpen}
+                size={{
+                    base:"sm",
+                    sm: "md"
+                }}
             >
                 Post
             </Button>

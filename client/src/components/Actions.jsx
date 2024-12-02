@@ -15,16 +15,17 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { useToast } from "@chakra-ui/react";
+import postsAtom from "../atoms/PostsAtom";
 
-const Actions = ({ post: post_ }) => {
+const Actions = ({ post }) => {
     const user = useRecoilValue(userAtom);
-    const [liked, setLiked] = useState(post_.likes.includes(user?._id));
+    const [liked, setLiked] = useState(post.likes.includes(user?._id));
     const [isReplying, setIsReplying] = useState(false);
     const [reply, setReply] = useState("");
-    const [post, setPost] = useState(post_);
+    const [posts, setPosts] = useRecoilState(postsAtom)
 
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -57,12 +58,21 @@ const Actions = ({ post: post_ }) => {
                 return;
             }
             if (!liked) {
-                setPost({ ...post, likes: [...post.likes, user._id] });
+                const updatedPosts = posts.map((p) => {
+					if (p._id === post._id) {
+						return { ...p, likes: [...p.likes, user._id] };
+					}
+					return p;
+				});
+				setPosts(updatedPosts);
             } else {
-                setPost({
-                    ...post,
-                    likes: post.likes.filter((id) => id !== user._id),
-                });
+                const updatedPosts = posts.map((p) => {
+					if (p._id === post._id) {
+						return { ...p, likes: p.likes.filter((id) => id !== user._id) };
+					}
+					return p;
+				});
+				setPosts(updatedPosts);
             }
 
             setLiked(!liked);
@@ -109,8 +119,14 @@ const Actions = ({ post: post_ }) => {
                 return;
             }
 
-            setPost({ ...post, replies: [...post.replies, data.reply] });
-
+            const updatedPosts = posts.map((p) => {
+				if (p._id === post._id) {
+					return { ...p, replies: [...p.replies, data] };
+				}
+				return p;
+			});
+			setPosts(updatedPosts);
+            
             toast({
                 description: "Reply posted successfully",
                 status: "success",
