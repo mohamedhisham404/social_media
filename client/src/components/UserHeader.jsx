@@ -9,7 +9,7 @@ import { useState } from 'react';
 const UserHeader =({user})=>{
     const toast = useToast();
     const currentUser = useRecoilValue(userAtom);//this is logedin user
-    const [following , setFollowing] = useState(user.data.followers.includes(currentUser._id))
+    const [following , setFollowing] = useState(user.data.followers.includes(currentUser?._id))
     const [updating,setUpdating] = useState(false)
     
     const copyURL = ()=>{
@@ -69,7 +69,7 @@ const UserHeader =({user})=>{
                     duration: 3000,
                     isClosable: true,
                 });
-                user.data.followers.push(currentUser._id);
+                user.data.followers.push(currentUser?._id);
             }
             setFollowing(!following)
         } catch(error){
@@ -134,13 +134,13 @@ const UserHeader =({user})=>{
                 {user.data.bio}
             </Text>
 
-            {currentUser._id === user.data._id &&(
+            {currentUser?._id === user.data._id &&(
                 <Link as={RouterLink} to='/update'>
                     <Button size={"sm"}>Update Profile</Button>
                 </Link>
             )}
 
-            {currentUser._id !== user.data._id &&(
+            {currentUser?._id !== user.data._id &&(
                 <Button size={"sm"} onClick={handleFollowUnfollow} isLoading={updating}>
                     {following?"Unfollow":"Follow"}
                 </Button>

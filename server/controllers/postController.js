@@ -72,9 +72,14 @@ const deletePost =async (req, res)=>{
             return res.status(401).json({ status: httpStatus.ERROR, data: 'Unauthorized to delete post' });
         }
 
+        if(post.img){
+            const imgId = post.img.split('/').pop().split(".")[0];
+            await cloudinary.uploader.destroy(imgId);
+        }
+
         await Post.findByIdAndDelete(req.params.id);
 
-        res.status(204).json({ status: httpStatus.SUCCESS, data: 'Post deleted successfully' });
+        res.status(200).json({ status: httpStatus.SUCCESS, data: 'Post deleted successfully' });
     } catch (error) {
         res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
@@ -92,8 +97,6 @@ const likePost =async (req, res)=>{
         }
 
         const userLikePost = post.likes.includes(userId);
-
-        console.log(post)
 
         if(userLikePost){
             //unlike post
@@ -127,7 +130,6 @@ const replyToPost =async (req, res)=>{
             return res.status(404).json({ status: httpStatus.ERROR, data: 'Post not found' });
         }
         const reply = { userId, text, userProfilePic, username };
-        console.log(reply)
 
 		post.replies.push(reply);
 		await post.save();
@@ -150,8 +152,24 @@ const getFeedPosts =async (req, res)=>{
 
         const following = user.following;
 
-		const feedPosts = await Post.find({ postedBy: { $in: following } });
+		const feedPosts = await Post.find({ postedBy: { $in: following } }).sort({ createdAt: -1 });
         res.status(200).json(feedPosts);
+    } catch (error) {
+        res.status(500).json({ status: httpStatus.ERROR, data: error.message });
+    }
+};
+
+const getUserPosts = async (req, res)=>{
+    const {username} = req.params;
+    try {
+        const user = await User.findOne({username})
+
+        if(!user){
+            return res.status(404).json({ status: httpStatus.ERROR, data: 'User not found' });
+        }
+
+        const posts = await Post.find({postedBy: user._id}).sort({ createdAt: -1 });
+        res.status(200).json(posts);
     } catch (error) {
         res.status(500).json({ status: httpStatus.ERROR, data: error.message });
     }
@@ -163,5 +181,6 @@ export{
     deletePost,
     likePost,
     replyToPost,
-    getFeedPosts
+    getFeedPosts,
+    getUserPosts
 };
