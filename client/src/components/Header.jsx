@@ -1,8 +1,7 @@
 import { Flex, Image, useColorMode, Button } from "@chakra-ui/react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
-import { AiFillHome } from "react-icons/ai";
-import { RxAvatar } from "react-icons/rx";
+import { IoHomeOutline } from "react-icons/io5";import { RxAvatar } from "react-icons/rx";
 import { Link as RouterLink } from "react-router-dom";
 import { Link } from "react-router";
 import { MdLogout } from "react-icons/md";
@@ -19,7 +18,7 @@ const Header = () => {
         <Flex justifyContent={"space-between"} mt={6} mb={12}>
             {user && (
                 <Link as={RouterLink} to="/">
-                    <AiFillHome size={24} />
+                    <IoHomeOutline size={24} />
                 </Link>
             )}
             {!user && (

@@ -1,5 +1,6 @@
 import { httpStatus } from '../utils/httpStatus.js';
 import User from '../models/userModel.js';
+import Post from '../models/postModel.js';
 import bcrypt from 'bcryptjs';
 import generateJWTsetCookie from '../utils/generateJWTsetCookie.js';
 import {v2 as cloudinary} from 'cloudinary';
@@ -170,6 +171,17 @@ const updateUser = async(req,res) =>{
 		user.bio = bio || user.bio;
 
 		user = await user.save();
+
+        await Post.updateMany(
+			{ "replies.userId": userId },
+			{
+				$set: {
+					"replies.$[reply].username": user.username,
+					"replies.$[reply].userProfilePic": user.profilePic,
+				},
+			},
+			{ arrayFilters: [{ "reply.userId": userId }] }
+		);
 
         user.password=null;
 
