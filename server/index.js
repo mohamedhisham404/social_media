@@ -32,7 +32,7 @@ app.use(cookieParser());
 // routes
 app.use("/api/users",userRoutes);
 app.use("/api/posts",postRoutes);
-app.use("/api/message",messageRoutes);
+app.use("/api/messages",messageRoutes);
 
 
 app.listen(PORT,()=>console.log(`listening on port ${PORT}`));
