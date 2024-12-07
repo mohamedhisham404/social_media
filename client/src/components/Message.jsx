@@ -1,6 +1,11 @@
 import { Avatar, Flex, Text } from "@chakra-ui/react";
+import { useRecoilValue } from "recoil";
+import { selectedConversationAtom } from "../atoms/messagesAtom";
+import userAtom from "../atoms/userAtom";
 
-const Message = ({ ownMessage }) => {
+const Message = ({ ownMessage, message }) => {
+    const selectedConversation = useRecoilValue(selectedConversationAtom);
+    const user = useRecoilValue(userAtom);
     return (
         <>
             {ownMessage ? (
@@ -11,17 +16,17 @@ const Message = ({ ownMessage }) => {
                         p={1}
                         borderRadius={"md"}
                     >
-                        Lorem ipsum, dolor sit amet consectetur adipisicing
-                        elit. Adipisci possimus labore aliquid atque, harum
-                        consequatur tempore explicabo odit suscipit deserunt
-                        sunt in nihil culpa, velit dolorum, laborum dolorem?
-                        Dolores, necessitatibus!
+                        {message.text}
                     </Text>
-                    <Avatar src="" w={7} h={7} />
+                    <Avatar src={user.profilePic} w={7} h={7} />
                 </Flex>
             ) : (
-                <Flex gap={2} >
-                                        <Avatar src="" w={7} h={7} />
+                <Flex gap={2}>
+                    <Avatar
+                        src={selectedConversation.userProfilePic}
+                        w={7}
+                        h={7}
+                    />
 
                     <Text
                         maxW={"350px"}
@@ -30,11 +35,7 @@ const Message = ({ ownMessage }) => {
                         borderRadius={"md"}
                         color={"black"}
                     >
-                        Lorem ipsum, dolor sit amet consectetur adipisicing
-                        elit. Adipisci possimus labore aliquid atque, harum
-                        consequatur tempore explicabo odit suscipit deserunt
-                        sunt in nihil culpa, velit dolorum, laborum dolorem?
-                        Dolores, necessitatibus!
+                        {message.text}
                     </Text>
                 </Flex>
             )}
