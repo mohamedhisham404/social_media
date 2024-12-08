@@ -6,13 +6,13 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { IoSendSharp } from "react-icons/io5";
-import useShowToast from "../hooks/useShowToast";
+import { useToast } from "@chakra-ui/react";
 import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
 const MessageInput = ({ setMessages }) => {
 	const [messageText, setMessageText] = useState("");
-	const showToast = useShowToast();
+    const toast = useToast();
 	const selectedConversation = useRecoilValue(selectedConversationAtom);
 	const setConversations = useSetRecoilState(conversationsAtom);
 	const [isSending, setIsSending] = useState(false);
@@ -37,7 +37,12 @@ const MessageInput = ({ setMessages }) => {
 			});
 			const data = await res.json();
 			if (data.error) {
-				showToast("Error", data.error, "error");
+				toast({
+                    description: data.error || "An error occurred",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
 				return;
 			}
 			setMessages((messages) => [...messages, data]);
@@ -59,7 +64,12 @@ const MessageInput = ({ setMessages }) => {
 			});
 			setMessageText("");
 		} catch (error) {
-			showToast("Error", error.message, "error");
+			toast({
+				description: error.message || "An error occurred",
+				status: "error",
+				duration: 5000,
+				isClosable: true,
+			});
 		} finally {
 			setIsSending(false);
 		}

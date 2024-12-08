@@ -14,10 +14,11 @@ const sendMessage =async (req, res)=>{
         if(!conversation){
             conversation = new Conversation({
                 participants : [senderId, recipientId],
-                lastMessage : [{sender:senderId, text:message}]
+                lastMessage : {sender:senderId, text:message}
             });
             await conversation.save();
         }
+        console.log(conversation)
 
         const newMessage = new Message({
             sender: senderId,
