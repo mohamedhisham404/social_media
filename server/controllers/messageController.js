@@ -1,7 +1,8 @@
 import { httpStatus } from '../utils/httpStatus.js';
 import Conversation from '../models/convesationModel.js';
 import Message from '../models/messageModel.js';
-
+import { getRecipientSocketsId } from '../socket/socket.js';
+import { io } from '../socket/socket.js';
 
 const sendMessage =async (req, res)=>{
     try {
@@ -18,7 +19,6 @@ const sendMessage =async (req, res)=>{
             });
             await conversation.save();
         }
-        console.log(conversation)
 
         const newMessage = new Message({
             sender: senderId,
@@ -35,6 +35,12 @@ const sendMessage =async (req, res)=>{
                 }
             })
         ])
+
+        const recipientSocketsId = getRecipientSocketsId(recipientId)
+        if(recipientSocketsId){
+            io.to(recipientSocketsId).emit("newMessage",newMessage)
+        }
+
         res.status(201).json(newMessage);
     } catch (error) {
         res.status(500).json({ status: httpStatus.ERROR, data: error.message });

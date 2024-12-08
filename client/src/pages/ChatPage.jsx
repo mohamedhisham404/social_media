@@ -8,6 +8,7 @@ import { useToast } from "@chakra-ui/react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
 import userAtom from "../atoms/userAtom";
+import { useSocket } from "../context/SoketContext";
 
 const ChatPage = () => {
 	const [searchingUser, setSearchingUser] = useState(false);
@@ -17,7 +18,7 @@ const ChatPage = () => {
 	const [conversations, setConversations] = useRecoilState(conversationsAtom);
 	const currentUser = useRecoilValue(userAtom);
     const toast = useToast();
-
+	const {socket,onlineUsers} = useSocket()
 
 	useEffect(() => {
 		const getConversations = async () => {
@@ -175,6 +176,7 @@ const ChatPage = () => {
 						conversations.map((conversation) => (
 							<Conversation
 								key={conversation._id}
+								isOnline={onlineUsers.includes(conversation.participants[0]._id)}
 								conversation={conversation}
 							/>
 						))}

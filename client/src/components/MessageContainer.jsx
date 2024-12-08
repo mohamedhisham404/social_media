@@ -10,11 +10,12 @@ import {
 } from "@chakra-ui/react";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useToast } from "@chakra-ui/react";
-import { selectedConversationAtom } from "../atoms/messagesAtom";
+import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
 import { useRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
+import { useSocket } from "../context/SoketContext";
 
 
 const MessageContainer = () => {
@@ -23,8 +24,37 @@ const MessageContainer = () => {
         selectedConversationAtom
     );
     const[loadingMessages,setLoadingMessages] = useState(true);
-    const [message, setMessages] = useState([])
+    const [messages, setMessages] = useState([])
     const currentUser = useRecoilState(userAtom)
+    const {socket} = useSocket()
+    const [,setConversations] = useRecoilState(conversationsAtom)
+    const messageEndRef= useRef(null)
+
+    useEffect(() => {
+        socket.on("newMessage", (message) => {
+            if (selectedConversation._id === message.conversationId) {
+                setMessages((prev) => [...prev, message]);
+            }
+    
+            setConversations((prev) => {
+                const updatedConversations = prev.map((conversation) => {
+                    if (conversation._id === message.conversationId) {
+                        return {
+                            ...conversation,
+                            lastMessage: {
+                                text: message.text,
+                                sender: message.sender, 
+                            },
+                        };
+                    }
+                    return conversation;
+                });
+                return updatedConversations;
+            });
+        });
+    
+        return () => socket.off("newMessage");
+    }, [socket, selectedConversation, setConversations, currentUser]);    
 
     useEffect(()=>{
         const getMessage = async ()=>{
@@ -57,6 +87,11 @@ const MessageContainer = () => {
         }
         getMessage();
     },[toast,selectedConversation])
+
+    useEffect(() => {
+		messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [messages]);
+
     return (
         <Flex
             flex={70}
@@ -103,8 +138,12 @@ const MessageContainer = () => {
                         </Flex>
                     ))}
                     {!loadingMessages &&(
-                        message.map((msg) => (
-                            <Message key={msg._id} message={msg} ownMessage={currentUser[0]._id === msg.sender}/>
+                        
+                        messages.map((msg) => (
+                            <Flex key={msg._id} direction={"column"} 
+                            ref={messages.length-1 === messages.indexOf(msg)?messageEndRef:null}>
+                            <Message  message={msg} ownMessage={currentUser[0]._id === msg.sender}/>
+                        </Flex>
                         ))
                     )}            
             </Flex>
