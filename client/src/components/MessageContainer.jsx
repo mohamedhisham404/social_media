@@ -103,7 +103,7 @@ const MessageContainer = () => {
                     ))}
                     {!loadingMessages &&(
                         message.map((msg) => (
-                            <Message key={msg._id} message={msg} ownMessage={currentUser._id === msg.sender}/>
+                            <Message key={msg._id} message={msg} ownMessage={currentUser[0]._id === msg.sender}/>
                         ))
                     )}            
             </Flex>
