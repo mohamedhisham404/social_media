@@ -3,10 +3,12 @@ import Conversation from '../models/convesationModel.js';
 import Message from '../models/messageModel.js';
 import { getRecipientSocketsId } from '../socket/socket.js';
 import { io } from '../socket/socket.js';
+import {v2 as cloudinary} from 'cloudinary';
 
 const sendMessage =async (req, res)=>{
     try {
         const {recipientId, message} =req.body;
+        let {img} = req.body;
         const senderId = req.user._id;
         let conversation = await Conversation.findOne({
             participants :{$all :[senderId ,recipientId]}
@@ -20,10 +22,16 @@ const sendMessage =async (req, res)=>{
             await conversation.save();
         }
 
+        if(img){
+            const uploadedResponse = await cloudinary.uploader.upload(img)
+            img = uploadedResponse.secure_url
+        }
+
         const newMessage = new Message({
             sender: senderId,
             conversationId : conversation._id,
             text: message,
+            img: img || ""
         })
         
         await Promise.all([
