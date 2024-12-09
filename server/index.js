@@ -35,3 +35,7 @@ app.use("/api/messages",messageRoutes);
 
 
 server.listen(PORT,()=>console.log(`listening on port ${PORT}`));
+
+
+//http://localhost:3001 :=> React
+//http://localhost:3000 :=> Back
