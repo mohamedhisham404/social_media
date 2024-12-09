@@ -4,14 +4,12 @@ import { CgMoreO } from "react-icons/cg";
 import { useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import {Link as RouterLink} from "react-router-dom"
-import { useState } from 'react';
+import useFollowUnfollow from "../hooks/useFollowUnfollow";
 
 const UserHeader =({user})=>{
     const toast = useToast();
     const currentUser = useRecoilValue(userAtom);//this is logedin user
-    const [following , setFollowing] = useState(user.data.followers.includes(currentUser?._id))
-    const [updating,setUpdating] = useState(false)
-    
+    const { handleFollowUnfollow, following, updating } = useFollowUnfollow(user.data);
     const copyURL = ()=>{
         const currentURL = window.location.href;
 		navigator.clipboard.writeText(currentURL).then(() => {
@@ -23,67 +21,7 @@ const UserHeader =({user})=>{
 			});
 		});
     }
-
-    const handleFollowUnfollow = async()=>{
-        if(!currentUser){
-            toast({
-                description: "Please Login To Follow Someone",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-            return;
-        }
-        if(updating)return;
-        setUpdating(true)
-        try {
-            const response = await fetch(`/api/users/follow/${user.data._id}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
-            console.log(data)
-            if(data.status === "error" || data.status === "fail"){
-                toast({
-                    description: data.data || "An error occurred",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
-                return;
-            }
-            if(following){
-                toast({
-                    description: `You Unfollowed ${user.data.name} Successfully`,
-                    status: "success",
-                    duration: 3000,
-                    isClosable: true,
-                });
-                user.data.followers.pop();
-            }else{
-                toast({
-                    description: `You Followed ${user.data.name} Successfully`,
-                    status: "success",
-                    duration: 3000,
-                    isClosable: true,
-                });
-                user.data.followers.push(currentUser?._id);
-            }
-            setFollowing(!following)
-        } catch(error){
-            toast({
-                description: error,
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-        }finally{
-            setUpdating(false)
-        }   
-    }
-
+   
     return (
        <VStack gap={4} alignItems={"start"}>
             <Flex justifyContent={'space-between'} w={"full"}>

@@ -1,7 +1,8 @@
-import { Flex, Spinner } from "@chakra-ui/react";
+import { Box, Flex, Spinner } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import Post from "../components/Post";
+import SuggestedUsers from "../components/SuggestedUsers";
 import { useRecoilState } from "recoil";
 import postsAtom from "../atoms/PostsAtom";
 
@@ -13,20 +14,20 @@ const HomePage = () => {
     useEffect(() => {
         const getFeedPosts = async () => {
             setLoading(true);
-            setPosts([])
+            setPosts([]);
             try {
                 const response = await fetch("/api/posts/feed");
                 const data = await response.json();
 
-                if(data.error){
-                  toast({
-                    title: "Error fetching feed posts",
-                    description: data.error || "An error occurred",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                  });
-                  return;
+                if (data.error) {
+                    toast({
+                        title: "Error fetching feed posts",
+                        description: data.error || "An error occurred",
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    return;
                 }
                 setPosts(data);
             } catch (error) {
@@ -37,28 +38,38 @@ const HomePage = () => {
                     duration: 5000,
                     isClosable: true,
                 });
-            }finally{
-               setLoading(false);
+            } finally {
+                setLoading(false);
             }
         };
-        
-        getFeedPosts();
-    },[toast,setPosts]);
 
+        getFeedPosts();
+    }, [toast, setPosts]);
 
     return (
-      <>
-        {!loading && Posts.length ===0 && <h1>Follow some users to see the feed</h1>}
-      {loading &&(
-          <Flex justify={"center"}>
-            <Spinner size={"xl"}/>
-          </Flex>
-        )}
+        <Flex gap={10} alignItems={"flex-start"}>
+            <Box flex={70}>
+                {!loading && Posts.length === 0 && (
+                    <h1>Follow some users to see the feed</h1>
+                )}
+                {loading && (
+                    <Flex justify={"center"}>
+                        <Spinner size={"xl"} />
+                    </Flex>
+                )}
 
-        {Posts.map((post) => (
-          <Post key={post._id} post={post} postedBy={post.postedBy}/>
-        ))}
-      </>
+                {Posts.map((post) => (
+                    <Post key={post._id} post={post} postedBy={post.postedBy} />
+                ))}
+            </Box>
+
+            <Box flex={30} display={{
+                base:"none",
+                md:"block"
+            }}>
+                <SuggestedUsers/>
+            </Box>
+        </Flex>
     );
 };
 

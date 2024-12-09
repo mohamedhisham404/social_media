@@ -9,7 +9,7 @@ const generateJWTsetCookie = async (userId ,res) => {
     
     res.cookie('token', token, {
         httpOnly: true,
-        maxAge: 15 * 60 * 60 * 24 * 15,
+        maxAge: 15 * 24 * 60 * 60 * 1000,
         sameSite:"strict"
     });
 
