@@ -60,19 +60,19 @@ const signupUser = async(req,res) =>{
 const loginUser = async(req,res) =>{
     try {
         const {username, password} = req.body;
-
+        
         if(!username || !password){
             return res.status(400).json({ status: httpStatus.ERROR, data: 'Username and Password are required' });
+        }
+        
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ status: httpStatus.ERROR, data: 'Invalid Email or Password' });
         }
 
         if(user.isFrozen){
             user.isFrozen = false;
             await user.save();
-        }
-
-        const user = await User.findOne({ username });
-        if (!user) {
-            return res.status(404).json({ status: httpStatus.ERROR, data: 'Invalid Email or Password' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);

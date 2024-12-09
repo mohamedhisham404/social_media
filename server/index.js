@@ -8,6 +8,8 @@ import messageRoutes from './routes/messageRoutes.js';
 import {v2 as cloudinary} from 'cloudinary';
 import bodyParser from 'body-parser';
 import {app,server} from "./socket/socket.js"
+import path from 'path'
+const __dirname = path.resolve();
 
 // it works for all of the functions
 dotenv.config(); 
@@ -33,9 +35,14 @@ app.use("/api/users",userRoutes);
 app.use("/api/posts",postRoutes);
 app.use("/api/messages",messageRoutes);
 
+//http://localhost:3000 :=> Back,front
+
+if(process.env.NODE_ENV === 'production'){
+    app.use(express.static(path.join(__dirname,'/client/dist')));
+
+    app.get("*",(req,res)=>{
+        res.sendFile(path.resolve(__dirname,"client","dist","index.html"))
+    })
+}
 
 server.listen(PORT,()=>console.log(`listening on port ${PORT}`));
-
-
-//http://localhost:3001 :=> React
-//http://localhost:3000 :=> Back
