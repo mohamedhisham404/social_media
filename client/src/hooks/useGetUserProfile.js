@@ -23,6 +23,10 @@ const useGetUserProfile = () => {
                     });
                     return;
                 }
+                if(userData.data.frozen){
+                    setUser(null);
+                    return;
+                }
                 setUser(userData);
             } catch (error) {
                 toast({
@@ -37,7 +41,7 @@ const useGetUserProfile = () => {
         };
 
         getUser();
-    }, [username]);
+    }, [username,toast]);
 
     return { user, loading };
 };

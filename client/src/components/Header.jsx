@@ -8,6 +8,7 @@ import { MdLogout } from "react-icons/md";
 import useLogout from "../hooks/useLogout";
 import authScreenAtom from "../atoms/authAtom";
 import { IoChatbubbleOutline } from "react-icons/io5";
+import { MdOutlineSettings } from "react-icons/md";
 const Header = () => {
     const { colorMode, toggleColorMode } = useColorMode();
     const user = useRecoilValue(userAtom);
@@ -44,6 +45,9 @@ const Header = () => {
                     </Link>
                     <Link as={RouterLink} to={`/chat`}>
                         <IoChatbubbleOutline size={24} />
+                    </Link>
+                    <Link as={RouterLink} to={`/settings`}>
+                        <MdOutlineSettings size={24} />
                     </Link>
                     <Button size={"xs"} onClick={logout}>
                         <MdLogout size={20} />

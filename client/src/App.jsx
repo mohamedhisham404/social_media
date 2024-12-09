@@ -5,6 +5,7 @@ import PostPage from "./pages/PostPage";
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import ChatPage from "./pages/ChatPage";
+import {SettingsPage} from "./pages/SettingsPage";
 import UserProfileUpdate from "./pages/UserProfileUpdate";
 import Header from "./components/Header";
 import CreatePost from "./components/CreatePost";
@@ -64,6 +65,12 @@ function App() {
                         path="/chat"
                         element={
                             user ? <ChatPage /> : <Navigate to={"/auth"} />
+                        }
+                    />
+                    <Route
+                        path="/settings"
+                        element={
+                            user ? <SettingsPage /> : <Navigate to={"/auth"} />
                         }
                     />
                     <Route path="*" element={<Navigate to="/" />} />

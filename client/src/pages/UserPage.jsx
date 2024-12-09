@@ -16,6 +16,7 @@ const UserPage =()=>{
 
     useEffect(()=>{
         const getPosts = async ()=>{
+            if(!user)return;
             setFetchingPosts(true);
             try {
                 const res = await fetch(`/api/posts/user/${username}`)
@@ -35,7 +36,7 @@ const UserPage =()=>{
         }
 
         getPosts();
-    },[username,setPosts]);
+    },[username,setPosts,toast,user]);
     
     if(!user && loading){
         return(

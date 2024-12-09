@@ -65,6 +65,11 @@ const loginUser = async(req,res) =>{
             return res.status(400).json({ status: httpStatus.ERROR, data: 'Username and Password are required' });
         }
 
+        if(user.isFrozen){
+            user.isFrozen = false;
+            await user.save();
+        }
+
         const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ status: httpStatus.ERROR, data: 'Invalid Email or Password' });
@@ -219,4 +224,20 @@ const getSuggetedUsers = async(req,res) =>{
 	}
 };
 
-export {signupUser ,loginUser ,logoutUser, followUnfollowUser, updateUser,getUserProfile,getSuggetedUsers};
+const freezAccount = async(req,res) =>{
+    try {
+		const user = await User.findById(req.user._id);
+		if (!user) {
+			return res.status(400).json({ error: "User not found" });
+		}
+
+		user.isFrozen = true;
+		await user.save();
+
+		res.status(200).json({ success: true });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+}
+
+export {signupUser,freezAccount ,loginUser ,logoutUser, followUnfollowUser, updateUser,getUserProfile,getSuggetedUsers};
