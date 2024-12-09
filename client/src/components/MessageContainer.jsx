@@ -13,16 +13,14 @@ import MessageInput from "./MessageInput";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@chakra-ui/react";
 import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { useSocket } from "../context/SoketContext";
 
 
 const MessageContainer = () => {
     const toast = useToast();
-    const [selectedConversation, setSelectedConversation] = useRecoilState(
-        selectedConversationAtom
-    );
+    const selectedConversation = useRecoilValue(selectedConversationAtom);
     const[loadingMessages,setLoadingMessages] = useState(true);
     const [messages, setMessages] = useState([])
     const currentUser = useRecoilState(userAtom)
@@ -54,7 +52,32 @@ const MessageContainer = () => {
         });
     
         return () => socket.off("newMessage");
-    }, [socket, selectedConversation, setConversations, currentUser]);    
+    }, [socket, selectedConversation, setConversations]);    
+
+    useEffect(()=>{
+        const lastMssageFromOtherUser = messages.length && messages[messages.length-1].sender !== currentUser._id
+
+        if(lastMssageFromOtherUser){
+            socket.emit("markMessagesAsSeen",{
+                conversationId:selectedConversation._id,
+                userId: selectedConversation.userId
+            })
+        }
+
+        socket.on("messageSeen",({conversationId})=>{
+            if(selectedConversation._id === conversationId){
+                setMessages(prev =>{
+                    const updatedMessages = prev.map(message =>{
+                        if(!message.seen){
+                            return {...message, seen:true}
+                        }
+                        return message;
+                    })
+                    return updatedMessages;
+                })
+            }
+        })
+    },[socket,selectedConversation,currentUser._id,messages ])
 
     useEffect(()=>{
         const getMessage = async ()=>{

@@ -20,6 +20,20 @@ const ChatPage = () => {
     const toast = useToast();
 	const {socket,onlineUsers} = useSocket()
 
+	useEffect(()=>{
+		socket?.on("messageSeen",({conversationId})=>{
+			setConversations(prev=>{
+				const updatedConversations = prev.map(conversation=>{
+                    if(conversation._id === conversationId){
+                        return {...conversation, lastMessage:{...conversation.lastMessage, seen:true}}
+                    }
+                    return conversation;
+                })
+                return updatedConversations;
+			})
+		})
+	})
+
 	useEffect(() => {
 		const getConversations = async () => {
 			try {
