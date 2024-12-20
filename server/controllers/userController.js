@@ -10,12 +10,14 @@ const getUserProfile = async(req,res) =>{
     const {query} = req.params;
     try {
         let user;
-        
+        // console.log(query);
         if(mongoose.Types.ObjectId.isValid(query)){
             user = await User.findOne({_id:query}).select("-password").select("-updatedAt");
         }else{
             user = await User.findOne({username:query}).select("-password").select("-updatedAt");
         }
+        // console.log("query:",user);
+
         if(!user){
             return res.status(404).json({ status: httpStatus.ERROR, data: 'User not found' });
         }
