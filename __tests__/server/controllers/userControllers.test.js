@@ -7,7 +7,6 @@ import bcrypt from 'bcryptjs';
 import dotenv from "dotenv";
 
 dotenv.config(); 
-jest.mock('../../../server/models/userModel.js')
 jest.setTimeout(70 * 1000)
 
 beforeEach(async () => {
@@ -25,12 +24,12 @@ it('has a module',()=>{
 
 describe('get user', () => {
     it('should get user profile by id', async () => {
-        const userId = '6743a8b1a239caa082846abd';  
+        const userId = '6743a8b1a239caa082846abd';
         const res = await request(app)
             .get(`/api/users/profile/${userId}`)
-            .expect(200);  
+            .expect(200);
         const data = res.body;
-        expect(data.data.email).toBe('mohamed@mail.com'); 
+        expect(data.data.email).toBe('mohamed@mail.com');
     });
 
     it('should get user profile by id', async () => {
@@ -43,6 +42,7 @@ describe('get user', () => {
     });    
 });
 
+jest.mock('../../../server/models/userModel.js')
 describe('login', () => {
     
     it('should return 400 if username or password is not provided', async () => {
