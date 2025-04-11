@@ -1,7 +1,8 @@
 // jest.config.js
 module.exports = {
   transform: {
-    "^.+\\.[t|j]s$": "babel-jest",
+    "^.+\\.(js|jsx)$": "babel-jest",
   },
   testEnvironment: "node",
 };
+

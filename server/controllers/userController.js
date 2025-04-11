@@ -10,13 +10,11 @@ const getUserProfile = async(req,res) =>{
     const {query} = req.params;
     try {
         let user;
-        // console.log(query);
         if(mongoose.Types.ObjectId.isValid(query)){
             user = await User.findOne({_id:query}).select("-password").select("-updatedAt");
         }else{
             user = await User.findOne({username:query}).select("-password").select("-updatedAt");
         }
-        // console.log("query:",user);
 
         if(!user){
             return res.status(404).json({ status: httpStatus.ERROR, data: 'User not found' });
@@ -111,8 +109,6 @@ const followUnfollowUser = async(req,res) =>{
         if (!userToModify ||!currentUser)
             return res.status(404).json({ status: httpStatus.ERROR, data: 'User not founed' });
 
-		if (!userToModify || !currentUser) 
-            return res.status(404).json({ status: httpStatus.ERROR, data: 'User not founed' });
 
 		const isFollowing = currentUser.following.includes(id);
 
@@ -187,7 +183,7 @@ const updateUser = async(req,res) =>{
 					"replies.$[reply].userProfilePic": user.profilePic,
 				},
 			},
-			{ arrayFilters: [{ "reply.userId": userId }] }
+			{ arrayFilters: [{ "reply.userID": userId }] }
 		);
 
         user.password=null;
